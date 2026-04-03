@@ -1,0 +1,62 @@
+name: Salesforce Delta Deploy (CI/CD)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'force-app/**' # Only trigger if metadata actually changed
+
+jobs:
+  delta-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout source code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required for delta to compare git history accurately
+
+      # 2. Setup Node environment
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'latest'
+
+      # 3. Install Salesforce CLI natively
+      - name: Install Salesforce CLI
+        run: |
+          npm install @salesforce/cli --global
+          sf --version
+
+      # 4. Install SFDX Git Delta plugin
+      - name: Install SFDX-Git-Delta
+        run: |
+          echo y | sf plugins install sfdx-git-delta
+          sf plugins
+
+      # 5. Authorize Salesforce Org
+      # The SFDX_AUTH_URL must be stored securely in GitHub Repository Secrets.
+      # You can extract this from your local machine by running `sf org display --target-org <alias> --verbose`.
+      - name: Authenticate Securely to Salesforce Org
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+        run: |
+          echo "$SFDX_AUTH_URL" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url -f ./SFDX_AUTH_URL.txt -s -a deploymentOrg
+          rm ./SFDX_AUTH_URL.txt
+
+      # 6. Generate Delta file array
+      # This compares HEAD (current pushed commit) against HEAD^ (previous commit) and spits out the exact delta 
+      - name: Generate Delta Deployment Package
+        run: |
+          mkdir -p package
+          sf sgd source delta --to "HEAD" --from "HEAD^" --output "." -i .forceignore
+          echo "------ Generated Target CI/CD package.xml ------"
+          cat package/package.xml
+
+      # 7. Execute Delta Payload to Org
+      # Explicitly deploys exactly what is mapped in the new delta package.xml
+      - name: Deploy Delta Payload to Salesforce
+        run: |
+          sf project deploy start --manifest package/package.xml --target-org deploymentOrg --test-level RunLocalTests

@@ -12,7 +12,7 @@ global with sharing class InventoryRestResource {
 
         try {
             // In a real scenario, this payload contains external ERP inventory status
-            String payload = req.requestBody != null ? req.requestBody.toString() : '';
+            String payload = (req != null && req.requestBody != null) ? req.requestBody.toString() : '';
             
             // DML or Logic to apply updates to Order/Inventory objects goes here.
             
@@ -24,7 +24,7 @@ global with sharing class InventoryRestResource {
             Integration_Log__c log = new Integration_Log__c();
             log.Direction__c = 'Inbound';
             log.Error_Message__c = e.getMessage() + '\n' + e.getStackTraceString();
-            log.Payload__c = req.requestBody != null ? req.requestBody.toString() : 'Blank Payload';
+            log.Payload__c = (req != null && req.requestBody != null) ? req.requestBody.toString() : 'Blank Payload';
             insert log;
             
             // Return 500 status to ERP
