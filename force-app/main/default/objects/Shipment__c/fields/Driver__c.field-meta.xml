@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Driver__c</fullName>
+    <description>The user physically delivering this shipment. This drives the Apex Managed Sharing.</description>
+    <externalId>false</externalId>
+    <label>Driver</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Assigned_Shipments</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

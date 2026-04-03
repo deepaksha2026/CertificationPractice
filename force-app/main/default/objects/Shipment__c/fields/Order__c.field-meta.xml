@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order__c</fullName>
+    <description>Lookup to the standard Order object. (Not Master-Detail so we can explicitly control sharing manually).</description>
+    <externalId>false</externalId>
+    <label>Order</label>
+    <referenceTo>Order</referenceTo>
+    <relationshipLabel>Shipments</relationshipLabel>
+    <relationshipName>Shipments</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>
